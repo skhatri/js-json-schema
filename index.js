@@ -1,5 +1,5 @@
-var topdown = require('./topdown'),
-    bottomup = require('./bottomup');
+var topdown = require('./includes/topdown'),
+    bottomup = require('./includes/bottomup');
 
 module.exports = {
     topdown: topdown,
