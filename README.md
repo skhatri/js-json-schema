@@ -1,4 +1,5 @@
 js-json-schema
+
 ==============
 
 JS to JSON schema generator
@@ -15,10 +16,16 @@ JS to JSON schema generator
  User.prototype.extend.member = ["memberId"];
  
  var types = {User:User, Address:Address};
- 
- //using top down approach
+```
+
+using top down approach
+-----------------------
+```
  require('js-json-schema').topdown.generate({schemaDir:'td-schema', ext:'.schema.json'});
- 
- //using bottom up approach
+```
+using bottom up approach
+-----------------------
+```
  require('js-json-schema').bottomup.generate({schemaDir:'bu-schema', ext:'.schema.json'});
 ```
+
