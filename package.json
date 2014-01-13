@@ -1,0 +1,27 @@
+{
+  "name": "js-json-schema",
+  "version": "0.0.2",
+  "description": "create json schema from javascript configuration",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/skhatri/js-json-schema.git"
+  },
+  "keywords": [
+    "json",
+    "schema",
+    "js",
+    "jsonschema"
+  ],
+  "author": "Suresh Khatri",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/skhatri/js-json-schema/issues"
+  },
+  "homepage": "https://github.com/skhatri/js-json-schema",
+  "dependencies": {
+  }
+}
