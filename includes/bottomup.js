@@ -9,15 +9,17 @@ var generate = function (types, options) {
                 var typeInstance = new types[t]();
                 if (typeInstance.extend) {
                     if (typeInstance.extend[q]) {
-                        return q.capitalize() + type.capitalize() + options.ext;
+                        return q.capitalize() + type.capitalize();
                     }
                 } else {
-                    return type.capitalize() + options.ext;
+                    return type.capitalize();
                 }
             }
         }
-        return type.capitalize() + options.ext;
+        return type.capitalize();
     };
+
+
 
     var generator = function (instance, name) {
 
@@ -39,36 +41,21 @@ var generate = function (types, options) {
                 schema.properties[name] = {};
                 schema.properties[name].id = "#" + name;
                 schema.properties[name].description = description + name;
-                if (type.toLowerCase() === "enum") {
-                    schema.properties[name].enum = element.enum;
-                } else {
-                    schema.properties[name].type = type.toLowerCase();
-                    if (type.toLowerCase() === "number") {
-                        schema.properties[name].minimum = 0;
-                    }
-                    if (type.toLowerCase() === "date") {
-                        schema.properties[name].type = "string";
-                        schema.properties[name].format = "date";
-                    }
-                    if (!helper.isDefaultType(schema.properties[name].type.toLowerCase())) {
-                        schema.properties[name].type = "object";
-                        schema.properties[name]["$ref"] = findReference(type, category);
-                    }
-                }
+                helper.handleTypes(schema, name, type, element, category, options, findReference);
             }
             return schema;
         };
 
         var schema = createSchema(instance.attributes ? instance.attributes : [], 'Description for ', '');
 
-        save(schema, name.capitalize() + (instance.extend ? 'Base' : ''));
+        save(schema, name.capitalize());
 
 
         for (var q in instance.extend) {
             var extended = instance.extend[q];
             var subSchema = createSchema(extended, 'description for ' + q + ', ', q);
             subSchema.allOf = [
-                {"$ref": name.capitalize() + 'Base' + options.ext}
+                {"$ref": name.capitalize() + options.ext}
             ];
             save(subSchema, q.capitalize() + name);
         }
@@ -99,7 +86,7 @@ var generate = function (types, options) {
  *
  * var types = {User:User, Address:Address};
  *
- *  A setup such as above will create Address schema and along with it UserBase, StaffUser and Member
+ *  A setup such as above will create Address schema and along with it User, StaffUser and Member
  *  using all of specification from the generated Sub type schemas.
  */
 
