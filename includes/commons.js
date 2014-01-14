@@ -19,7 +19,7 @@ if (String.prototype.endsWith === undefined) {
     };
 }
 
-var varType = /([a-zA-Z]+):([A-Za-z\s,_\[\]]+)/;
+var varType = /([a-zA-Z_]+):([A-Za-z\s,_\[\]]+)/;
 
 var isDefaultType = function (typeName) {
     var jsonTypes = ['integer', 'number', 'object', 'array', 'boolean', 'string'];
