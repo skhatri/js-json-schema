@@ -10,9 +10,16 @@ if (String.prototype.startsWith === undefined) {
         return new RegExp("^" + text).test(this)
     };
 }
+if (String.prototype.endsWith === undefined) {
+    String.prototype.endsWith = function (text) {
+        text = text.replace(".", "\\.");
+        text = text.replace("[", "\\[");
+        text = text.replace("]", "\\]");
+        return new RegExp(text+"$").test(this)
+    };
+}
 
-
-var varType = /([a-zA-Z]+):([A-Za-z\s,_]+)/;
+var varType = /([a-zA-Z]+):([A-Za-z\s,_\[\]]+)/;
 
 var isDefaultType = function (typeName) {
     var jsonTypes = ['integer', 'number', 'object', 'array', 'boolean', 'string'];
@@ -51,9 +58,38 @@ var cleanser = function (types, options, defaults) {
     }
 };
 
+var handleTypes = function(schema, name, type, element, category, options, refFinder) {
+    if (type.toLowerCase() === "enum") {
+        schema.properties[name].enum = element.enum;
+    } else {
+        schema.properties[name].type = type.toLowerCase();
+        if (type.toLowerCase() === "number") {
+            schema.properties[name].minimum = 0;
+        }
+        if (type.toLowerCase() === "date") {
+            schema.properties[name].type = "string";
+            schema.properties[name].format = "date";
+        }
+        if (type.toLowerCase() === "datetime") {
+            schema.properties[name].type = "string";
+            schema.properties[name].format = "date-time";
+        }
+        if (!isDefaultType(schema.properties[name].type.toLowerCase())) {
+            var refType = refFinder(type, category);
+            if (refType.endsWith("[]")) {
+                schema.properties[name].type = "array";
+                schema.properties[name]["items"] = {"$ref": refType.slice(0, refType.length - 2) + options.ext};
+            } else {
+                schema.properties[name].type = "object";
+                schema.properties[name]["$ref"] = refType + options.ext;
+            }
+        }
+    }
+};
 
 module.exports = {
     isDefaultType: isDefaultType,
     inspect: inspect,
-    cleanser: cleanser
+    cleanser: cleanser,
+    handleTypes: handleTypes
 };
