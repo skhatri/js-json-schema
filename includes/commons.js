@@ -58,6 +58,18 @@ var cleanser = function (types, options, defaults) {
     }
 };
 
+var addValidations = function (prop, name, validations, validationPath) {
+    if (validations && validations[validationPath]) {
+        var properties = validations[validationPath];
+        var fieldProperties = properties[name];
+        if (fieldProperties) {
+            for (var a in fieldProperties) {
+                prop[a] = fieldProperties[a];
+            }
+        }
+    }
+};
+
 var handleTypes = function(schema, name, type, element, category, options, refFinder) {
     if (type.toLowerCase() === "enum") {
         schema.properties[name].enum = element.enum;
@@ -91,5 +103,6 @@ module.exports = {
     isDefaultType: isDefaultType,
     inspect: inspect,
     cleanser: cleanser,
-    handleTypes: handleTypes
+    handleTypes: handleTypes,
+    addValidations: addValidations
 };

@@ -1,5 +1,4 @@
 js-json-schema
-
 ==============
 
 JS to JSON schema generator
@@ -29,7 +28,3 @@ using bottom up approach
  require('js-json-schema').bottomup.generate({schemaDir:'bu-schema', ext:'.schema.json'});
 ```
 
-
-installation
-------------
-npm install js-json-schema

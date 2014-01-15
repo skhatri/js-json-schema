@@ -6,7 +6,7 @@ var generate = function (types, options) {
     var findReference = function (type, q) {
         for (var t in types) {
             if (t.toLowerCase() === type.toLowerCase()) {
-                var typeInstance = new types[t]();
+                var typeInstance = (typeof types[t] === "object") ? types[t]: new types[t]();
                 if (typeInstance.extend) {
                     if (typeInstance.extend[q]) {
                         return q.capitalize() + type.capitalize();
@@ -20,11 +20,12 @@ var generate = function (types, options) {
     };
 
 
-
     var generator = function (instance, name) {
 
 
-        var createSchema = function (collection, description, category) {
+
+
+        var createSchema = function (collection, description, category, validations, validationPath) {
             var schema = {};
             schema.title = name;
             schema.type = 'object';
@@ -41,19 +42,22 @@ var generate = function (types, options) {
                 schema.properties[name] = {};
                 schema.properties[name].id = "#" + name;
                 schema.properties[name].description = description + name;
+                helper.addValidations(schema.properties[name], element.name, validations, validationPath);
                 helper.handleTypes(schema, name, type, element, category, options, findReference);
             }
             return schema;
         };
 
-        var schema = createSchema(instance.attributes ? instance.attributes : [], 'Description for ', '');
+        var schema = createSchema(instance.attributes ? instance.attributes : [], 'Description for ', '',
+            instance.validations ? instance.validations : {}, "properties");
 
         save(schema, name.capitalize());
 
 
         for (var q in instance.extend) {
             var extended = instance.extend[q];
-            var subSchema = createSchema(extended, 'description for ' + q + ', ', q);
+            var subSchema = createSchema(
+                extended, 'description for ' + q + ', ', q, instance.validations ? instance.validations : {}, q);
             subSchema.allOf = [
                 {"$ref": name.capitalize() + options.ext}
             ];
@@ -70,7 +74,11 @@ var generate = function (types, options) {
         fs.writeFileSync(options.schemaDir + '/' + name + options.ext, json, 'utf8');
     };
     for (var x in types) {
-        generator(new types[x](), x);
+        var typeName = types[x];
+        if(typeof typeName === "object")
+            generator(typeName, x);
+        else
+            generator(new typeName(), x);
     }
 };
 /**

@@ -2,6 +2,10 @@ var fs = require('fs'), helper = require('./commons');
 
 var generate = function (types, options) {
 
+        var findReference = function (type) {
+            return type.capitalize();
+        };
+
         var generator = function (instance, name) {
 
             var schema = {};
@@ -10,7 +14,7 @@ var generate = function (types, options) {
             schema["$schema"] = "http://json-schema.org/schema#";
             schema.properties = {};
             schema.required = [];
-            var propertiesEvaluator = function (collection, schema, description) {
+            var propertiesEvaluator = function (collection, schema, description, validations, validationPath) {
                 for (var i = 0; i < collection.length; i += 1) {
                     var attribute = collection[i];
                     var element = helper.inspect(attribute);
@@ -21,31 +25,17 @@ var generate = function (types, options) {
                     schema.properties[name] = {};
                     schema.properties[name].id = "#" + name;
                     schema.properties[name].description = description + name;
-                    if (type.toLowerCase() === "enum") {
-                        schema.properties[name].enum = element.enum;
-                    } else {
-                        schema.properties[name].type = type.toLowerCase();
-                        if (type.toLowerCase() === "number") {
-                            schema.properties[name].minimum = 0;
-                        }
-                        if (type.toLowerCase() === "date") {
-                            schema.properties[name].type = "string";
-                            schema.properties[name].format = "date";
-                        }
-                        if (!helper.isDefaultType(schema.properties[name].type.toLowerCase())) {
-                            schema.properties[name].type = 'object';
-                            schema.properties[name]["$ref"] = type.capitalize() + options.ext;
-                        }
-                    }
+                    helper.addValidations(schema.properties[name], element.name, validations, validationPath);
+                    helper.handleTypes(schema, name, type, element, '', options, findReference)
                 }
             };
-            propertiesEvaluator(instance.attributes, schema, 'Description for ');
+            propertiesEvaluator(instance.attributes, schema, 'Description for ', instance.validations?instance.validations:{}, "properties");
 
             schema.definitions = {};
             var propertyDefine = function (name, collection) {
                 schema.definitions[name] = {};
                 schema.definitions[name].properties = {};
-                propertiesEvaluator(collection, schema.definitions[name], 'applies to ' + name + ', ');
+                propertiesEvaluator(collection, schema.definitions[name], 'applies to ' + name + ', ', instance.validations?instance.validations:{}, name);
             };
 
             var extDefinitions = [];
@@ -75,7 +65,13 @@ var generate = function (types, options) {
         };
 
         for (var x in types) {
-            save(generator(new types[x](), x), x);
+
+            var typeName = types[x];
+            if(typeof typeName === "object")
+                save(generator(typeName, x), x);
+            else
+                save(generator(new typeName(), x), x);
+
         }
     }
     ;
