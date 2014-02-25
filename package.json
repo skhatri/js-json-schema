@@ -1,6 +1,6 @@
 {
   "name": "js-json-schema",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "create json schema from javascript configuration",
   "main": "index.js",
   "scripts": {
